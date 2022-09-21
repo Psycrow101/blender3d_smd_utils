@@ -5,7 +5,7 @@ from mathutils import Matrix
 bl_info = {
     "name": "Verts Bones",
     "author": "Psycrow",
-    "version": (0, 1),
+    "version": (0, 2),
     "blender": (2, 80, 0),
     "location": "Viewport Object Menu -> Animation -> Verts Bones",
     "description": "Creates bones for each mesh vertex",
@@ -23,7 +23,7 @@ class OBJECT_OT_VertsBones(Operator):
 
     @classmethod
     def poll(cls, context):
-        return (context.object.type == 'MESH' and context.active_object is not None)
+        return (context.object and context.object.type == 'MESH')
 
     def execute(self, context):
         view_layer = context.view_layer
@@ -31,7 +31,7 @@ class OBJECT_OT_VertsBones(Operator):
 
         ob = context.object
         bpy.ops.object.mode_set(mode='EDIT')
-        vertsCo = [v.co for v in ob.data.vertices]
+        verts_co = [v.co.copy() for v in ob.data.vertices]
 
         bpy.ops.object.mode_set(mode='OBJECT')
         arm = bpy.data.armatures.new('verts_arm')
@@ -50,13 +50,13 @@ class OBJECT_OT_VertsBones(Operator):
         modifier.object = arm_obj
 
         bpy.ops.object.mode_set(mode='EDIT')
-        for i, co in enumerate(vertsCo):
+        for i, co in enumerate(verts_co):
             b = arm.edit_bones.new(f'v{i}')
             b.head = co
-            b.tail = (co.x, co.y, co.z + 1.0)
+            b.tail = (co.x, co.y, co.z + 0.1)
 
         bpy.ops.object.mode_set(mode='OBJECT')
-        for i in range(len(vertsCo)):
+        for i in range(len(verts_co)):
             vg = ob.vertex_groups.new(name=f'v{i}')
             vg.add([i], 1.0, 'REPLACE')
 

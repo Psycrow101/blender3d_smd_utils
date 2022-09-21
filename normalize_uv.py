@@ -23,7 +23,7 @@ class NormalizeUV(Operator):
 
     @classmethod
     def poll(cls, context):
-        return (context.object.type == 'MESH' and context.edit_object)
+        return (context.edit_object and context.edit_object.type == 'MESH')
 
     def execute(self, context):
         obj = context.edit_object
