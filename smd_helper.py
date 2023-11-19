@@ -73,7 +73,11 @@ class WM_OT_SmdLoadTextures(bpy.types.Operator):
 
                 tex_img = mat.node_tree.nodes.new('ShaderNodeTexImage')
                 tex_img.image = img
-                bsdf_node.inputs['Specular'].default_value = 0.0
+                if bpy.app.version >= (4, 0, 0):
+                    specular = bsdf_node.inputs['Specular IOR Level']
+                else:
+                    specular = bsdf_node.inputs['Specular']
+                specular.default_value = 0.0
                 mat.node_tree.links.new(bsdf_node.inputs['Base Color'], tex_img.outputs['Color'])
 
         return {'FINISHED'}
