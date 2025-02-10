@@ -26,27 +26,34 @@ class OBJECT_OT_SELECT_UNASSIGNED_VERTS(Operator):
         return (context.object and context.object.type == 'MESH')
 
     def execute(self, context):
-        ob = context.object
-        ob.update_from_editmode()
+        for ob in context.selected_objects:
+            if ob.type != 'MESH':
+                continue
 
-        unassigned_verts = []
+            ob.update_from_editmode()
 
-        for v in ob.data.vertices:
-            is_assigned = False
-            for g in v.groups:
-                if g.weight > 0.0:
-                    is_assigned = True
-                    break
+            unassigned_verts = [not any(g.weight > 0.0 for g in v.groups) for v in ob.data.vertices]
 
-            unassigned_verts.append(is_assigned)
+            bm = bmesh.from_edit_mesh(ob.data)
+            bm.verts.ensure_lookup_table()
+            bm.edges.ensure_lookup_table()
+            bm.faces.ensure_lookup_table()
 
-        bm = bmesh.from_edit_mesh(ob.data)
-        for i, v in enumerate(bm.verts):
-            if not unassigned_verts[i]:
-                v.select = True
+            for i, select in enumerate(unassigned_verts):
+                if select:
+                    bm.verts[i].select = True
 
-        # force update selected vertices on view_layer
-        context.view_layer.objects.active = context.view_layer.objects.active
+            for edge in bm.edges:
+                if all(v.select for v in edge.verts):
+                    edge.select = True
+
+            for face in bm.faces:
+                if all(v.select for v in face.verts):
+                    face.select = True
+
+            bmesh.update_edit_mesh(ob.data)
+
+        context.area.tag_redraw()
 
         return {'FINISHED'}
 

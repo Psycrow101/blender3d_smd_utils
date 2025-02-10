@@ -26,23 +26,23 @@ class OBJECT_OT_STRONG_ASSIGN(Operator):
         return (ob and ob.type == 'MESH' and ob.vertex_groups.active)
 
     def execute(self, context):
-        activeVertGroup = context.object.vertex_groups.active
+        active_vert_group = context.object.vertex_groups.active
 
         for ob in context.selected_objects:
             if ob.type != 'MESH':
                 continue
 
-            vg = ob.vertex_groups.get(activeVertGroup.name)
+            vg = ob.vertex_groups.get(active_vert_group.name)
             if not vg:
                 continue
 
             ob.update_from_editmode()
-            selectedVertsIndexes = [v.index for v in ob.data.vertices if v.select]
+            selected_verts_indexes = [v.index for v in ob.data.vertices if v.select]
 
             bpy.ops.object.mode_set(mode='OBJECT')
             for g in ob.vertex_groups:
-                g.remove(selectedVertsIndexes)
-            vg.add(selectedVertsIndexes, 1.0, 'REPLACE')
+                g.remove(selected_verts_indexes)
+            vg.add(selected_verts_indexes, 1.0, 'REPLACE')
             bpy.ops.object.mode_set(mode='EDIT')
 
         return {'FINISHED'}
