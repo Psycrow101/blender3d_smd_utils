@@ -1,13 +1,14 @@
 import bpy
+from bpy.props import BoolProperty
 from bpy.types import Operator
 
 bl_info = {
     "name": "Remove Unassigned Vertex Groups",
     "author": "Psycrow",
-    "version": (1, 0),
+    "version": (1, 1),
     "blender": (2, 80, 0),
     "location": "Properties Editor > Object data > Vertex Groups > Specials menu",
-    "description": "Remove unassigned Vertex Groups",
+    "description": "Remove unassigned vertex groups",
     "warning": "",
     "wiki_url": "",
     "support": 'COMMUNITY',
@@ -18,24 +19,52 @@ bl_info = {
 class OBJECT_OT_REMOVE_UNASSIGNED_VG(Operator):
     bl_idname = "object.select_unassigned_vg"
     bl_label = "Remove Unassigned Vertex Groups"
+    bl_description = "Remove unassigned vertex groups"
     bl_options = {'REGISTER', 'UNDO'}
+
+    remove_empty: BoolProperty(
+        name="Remove Empty Groups",
+        description="Remove vertex groups with no assigned vertices",
+        default=True
+    )
+
+    remove_non_bone: BoolProperty(
+        name="Remove Non-Bone Groups",
+        description="Remove vertex groups that don't correspond to bones",
+        default=True
+    )
 
     @classmethod
     def poll(cls, context):
         return (context.object and context.object.type == 'MESH')
 
+    def invoke(self, context, event):
+        return context.window_manager.invoke_props_dialog(self)
+
+    def draw(self, context):
+        layout = self.layout
+        layout.prop(self, "remove_empty")
+        layout.prop(self, "remove_non_bone")
+
     def execute(self, context):
-        ob = context.object
-        ob.update_from_editmode()
-        arm = ob.find_armature()
+        for ob in context.selected_objects:
+            if ob.type != 'MESH':
+                continue
 
-        if arm:
-            bones_names = [b.name for b in arm.data.bones]
-        else:
-            bones_names = []
+            ob.update_from_editmode()
+            arm = ob.find_armature()
 
-        for vg in ob.vertex_groups:
-            if vg.name not in bones_names:
+            bones_names = [b.name for b in arm.data.bones] if arm else []
+            vg_to_remove = []
+
+            for vg in ob.vertex_groups:
+                if self.remove_non_bone and vg.name not in bones_names:
+                    vg_to_remove.append(vg)
+                elif self.remove_empty:
+                    if not any(vg.index in [g.group for g in v.groups] for v in ob.data.vertices):
+                        vg_to_remove.append(vg)
+
+            for vg in vg_to_remove:
                 ob.vertex_groups.remove(vg)
 
         return {'FINISHED'}
