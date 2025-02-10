@@ -7,7 +7,7 @@ bl_info = {
     "version": (1, 1),
     "blender": (2, 80, 0),
     "location": "Properties Editor > Object data > Vertex Groups > Specials menu",
-    "description": "Assign selected vertexes and ramove from all other groups",
+    "description": "Assign selected vertexes to the active vertex group and remove them from other vertex groups",
     "warning": "",
     "wiki_url": "",
     "support": 'COMMUNITY',
@@ -17,6 +17,7 @@ bl_info = {
 class OBJECT_OT_STRONG_ASSIGN(Operator):
     bl_idname = "object.strong_assign"
     bl_label = "Strong Assign"
+    bl_description = "Assign selected vertexes to the active vertex group and remove them from other vertex groups"
     bl_options = {'REGISTER', 'UNDO'}
 
     @classmethod
