@@ -4,7 +4,7 @@ from bpy.types import Operator
 bl_info = {
     "name": "Strong Vertex Group Assign",
     "author": "Psycrow",
-    "version": (1, 0),
+    "version": (1, 1),
     "blender": (2, 80, 0),
     "location": "Properties Editor > Object data > Vertex Groups > Specials menu",
     "description": "Assign selected vertexes and ramove from all other groups",
@@ -21,20 +21,28 @@ class OBJECT_OT_STRONG_ASSIGN(Operator):
 
     @classmethod
     def poll(cls, context):
-        return (context.object and context.object.type == 'MESH')
+        ob = context.object
+        return (ob and ob.type == 'MESH' and ob.vertex_groups.active)
 
     def execute(self, context):
-        ob = context.object
-        ob.update_from_editmode()
+        activeVertGroup = context.object.vertex_groups.active
 
-        activeGroup = ob.vertex_groups.active
-        selectedVertsIndexes = [v.index for v in ob.data.vertices if v.select]
+        for ob in context.selected_objects:
+            if ob.type != 'MESH':
+                continue
 
-        bpy.ops.object.mode_set(mode = 'OBJECT')
-        for g in ob.vertex_groups:
-            g.remove(selectedVertsIndexes)
-        activeGroup.add(selectedVertsIndexes, 1.0, 'REPLACE')
-        bpy.ops.object.mode_set(mode = 'EDIT')
+            vg = ob.vertex_groups.get(activeVertGroup.name)
+            if not vg:
+                continue
+
+            ob.update_from_editmode()
+            selectedVertsIndexes = [v.index for v in ob.data.vertices if v.select]
+
+            bpy.ops.object.mode_set(mode='OBJECT')
+            for g in ob.vertex_groups:
+                g.remove(selectedVertsIndexes)
+            vg.add(selectedVertsIndexes, 1.0, 'REPLACE')
+            bpy.ops.object.mode_set(mode='EDIT')
 
         return {'FINISHED'}
 
