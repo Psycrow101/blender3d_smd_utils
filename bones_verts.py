@@ -7,7 +7,7 @@ bl_info = {
     "author": "Psycrow",
     "version": (0, 2),
     "blender": (2, 80, 0),
-    "location": "Viewport Object Menu -> Animation -> Verts Bones",
+    "location": "Viewport Object Menu > Animation > Verts Bones",
     "description": "Creates bones for each mesh vertex",
     "warning": "",
     "wiki_url": "",

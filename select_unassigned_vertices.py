@@ -19,6 +19,7 @@ bl_info = {
 class OBJECT_OT_SELECT_UNASSIGNED_VERTS(Operator):
     bl_idname = "object.select_unassigned_vertices"
     bl_label = "Select Unassigned Vertices"
+    bl_description = "Select unassigned vertices to vertex groups"
     bl_options = {'REGISTER', 'UNDO'}
 
     @classmethod
