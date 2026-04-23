@@ -40,8 +40,7 @@ class SmdKeyframesScaleProp(PropertyGroup):
         name="",
         description="Keyframes scale",
         default=1.0,
-        step=0.1,
-        subtype='POWER')
+        step=0.1)
 
 
 class WM_OT_SmdLoadTextures(bpy.types.Operator):
