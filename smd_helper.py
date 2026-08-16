@@ -59,7 +59,7 @@ class WM_OT_SmdLoadTextures(bpy.types.Operator):
             mesh = ob.data
             for mat in mesh.materials:
                 mat.use_nodes = True
-                bsdf_node = mat.node_tree.nodes.get('Principled BSDF')
+                bsdf_node = next((n for n in mat.node_tree.nodes if n.type == 'BSDF_PRINCIPLED'), None)
                 if not bsdf_node:
                     continue
 
